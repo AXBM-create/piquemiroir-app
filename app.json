@@ -4,7 +4,6 @@
     "slug": "piquemiroir-app",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0E0F12",
     "ios": {
@@ -12,17 +11,6 @@
       "infoPlist": {
         "NSCameraUsageDescription": "PiqueMiroir utilise l'appareil photo pour analyser tes repas."
       }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#0E0F12",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-video",

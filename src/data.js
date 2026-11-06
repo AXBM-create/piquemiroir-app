@@ -1,3 +1,6 @@
+// Version Snack : les vidéos sont lues depuis GitHub (branche main).
+const VIDEO_BASE = 'https://raw.githubusercontent.com/AXBM-create/piquemiroir-app/main/assets/videos';
+
 // Exercices de la séance « Brûle-graisse maison ».
 // type 'reps' : on compte les répétitions ; type 'hold' : on compte les secondes tenues.
 export const EXERCISES = [
@@ -6,7 +9,7 @@ export const EXERCISES = [
     name: 'Squats',
     type: 'reps',
     tip: "Dos droit, genoux dans l'axe des pieds, cuisses à l'horizontale",
-    video: require('../assets/videos/squat.mp4'),
+    video: { uri: VIDEO_BASE + '/squat.mp4' },
     startBest: 15,
   },
   {
@@ -14,7 +17,7 @@ export const EXERCISES = [
     name: 'Fentes avant',
     type: 'reps',
     tip: 'Buste droit, les deux genoux à 90°, poussée sur le talon avant',
-    video: require('../assets/videos/fente.mp4'),
+    video: { uri: VIDEO_BASE + '/fente.mp4' },
     startBest: 13,
   },
   {
@@ -22,7 +25,7 @@ export const EXERCISES = [
     name: 'Pompes',
     type: 'reps',
     tip: 'Mains sous les épaules, corps gainé, poitrine près du sol',
-    video: require('../assets/videos/pompes.mp4'),
+    video: { uri: VIDEO_BASE + '/pompes.mp4' },
     startBest: 8,
   },
   {
@@ -30,7 +33,7 @@ export const EXERCISES = [
     name: 'Jumping jacks',
     type: 'reps',
     tip: "Réceptions souples sur l'avant du pied, rythme régulier",
-    video: require('../assets/videos/jumping.mp4'),
+    video: { uri: VIDEO_BASE + '/jumping.mp4' },
     startBest: 32,
   },
   {
@@ -38,7 +41,7 @@ export const EXERCISES = [
     name: 'Gainage',
     type: 'hold',
     tip: 'Coudes sous les épaules, bassin aligné, respiration calme',
-    video: require('../assets/videos/gainage.mp4'),
+    video: { uri: VIDEO_BASE + '/gainage.mp4' },
     startBest: 40,
   },
 ];
