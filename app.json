@@ -32,6 +32,8 @@
           "cameraPermission": "PiqueMiroir utilise l'appareil photo pour analyser tes repas."
         }
       ]
-    ]
+    ],
+    "owner": "axbm",
+    "runtimeVersion": "exposdk:58.0.0"
   }
 }

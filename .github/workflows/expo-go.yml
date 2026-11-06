@@ -1,0 +1,90 @@
+name: Publier dans Expo Go
+
+# À chaque push sur main : l'app est publiée sur le compte Expo (EAS Update)
+# et devient ouvrable dans Expo Go, sans terminal ni Codespace.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: expo-go
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier le secret EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "::error::Ajoutez le secret EXPO_TOKEN (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Lier le projet au compte Expo (première fois seulement)
+        run: |
+          if ! node -e 'process.exit(require("./app.json").expo.extra?.eas?.projectId ? 0 : 1)'; then
+            eas init --non-interactive --force
+          fi
+          node -e '
+            const fs = require("fs");
+            const j = JSON.parse(fs.readFileSync("app.json", "utf8"));
+            const id = j.expo.extra.eas.projectId;
+            j.expo.updates = { ...(j.expo.updates || {}), url: `https://u.expo.dev/${id}` };
+            j.expo.runtimeVersion = "exposdk:58.0.0";
+            fs.writeFileSync("app.json", JSON.stringify(j, null, 2) + "\n");
+          '
+          if ! git diff --quiet app.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app.json
+            git commit -m "Lier le projet à Expo [skip ci]"
+            git push
+          fi
+
+      - name: Publier la mise à jour
+        id: update
+        run: |
+          eas update --branch main --platform all --non-interactive \
+            --message "${{ github.event.head_commit.message || 'Publication manuelle' }}" --json > update.json
+          cat update.json
+          PROJECT_ID=$(node -e 'console.log(require("./app.json").expo.extra.eas.projectId)')
+          GROUP=$(node -e 'console.log(require("./update.json")[0].group)')
+          echo "project=$PROJECT_ID" >> "$GITHUB_OUTPUT"
+          echo "group=$GROUP" >> "$GITHUB_OUTPUT"
+
+      - name: Lien et QR code pour Expo Go
+        run: |
+          LINK="exp://u.expo.dev/${{ steps.update.outputs.project }}/group/${{ steps.update.outputs.group }}"
+          PAGE="https://expo.dev/accounts/axbm/projects/piquemiroir-app/updates/${{ steps.update.outputs.group }}"
+          QR="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "$LINK")"
+          {
+            echo "## 📱 PiqueMiroir est prêt dans Expo Go"
+            echo ""
+            echo "Scannez avec l'appareil photo de l'iPhone (Expo Go connecté au compte **axbm**) :"
+            echo ""
+            echo "![QR Expo Go]($QR)"
+            echo ""
+            echo "- Lien direct : \`$LINK\`"
+            echo "- Page Expo : $PAGE"
+          } >> "$GITHUB_STEP_SUMMARY"
