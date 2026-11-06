@@ -19,7 +19,10 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,6 +37,14 @@
       ]
     ],
     "owner": "axbm",
-    "runtimeVersion": "exposdk:58.0.0"
+    "runtimeVersion": "exposdk:58.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "25bb226b-6fb7-4e91-a002-e4e09415d148"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/25bb226b-6fb7-4e91-a002-e4e09415d148"
+    }
   }
 }
