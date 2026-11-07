@@ -5,7 +5,7 @@
 
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 // Modèles Gemini essayés dans l'ordre (le premier disponible en offre gratuite est utilisé).
-const GEMINI_MODELS = [process.env.GEMINI_MODEL, 'gemini-3.8-flash', 'gemini-3-flash-preview', 'gemini-3.1-flash-lite'].filter(Boolean);
+const GEMINI_MODELS = [process.env.GEMINI_MODEL, 'gemini-3-flash-preview', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'].filter(Boolean);
 const MAX_BASE64 = 6 * 1024 * 1024; // ~4,5 Mo d'image
 
 const TOOL = {
