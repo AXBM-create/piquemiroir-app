@@ -11,6 +11,7 @@ import { EXERCISES } from './src/data';
 import { ProfileContext, startBests } from './src/profile';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import { useStepCounter } from './src/steps';
+import { PremiumContext, usePremiumState } from './src/premium';
 import DuelScreen from './src/screens/DuelScreen';
 import PhotoScreen from './src/screens/PhotoScreen';
 import ProgramsScreen from './src/screens/ProgramsScreen';
@@ -18,6 +19,7 @@ import SessionScreen from './src/screens/SessionScreen';
 import ResultScreen from './src/screens/ResultScreen';
 import WeekScreen from './src/screens/WeekScreen';
 import PaywallScreen from './src/screens/PaywallScreen';
+import Intro from './src/Intro';
 
 const TABS = [
   { key: 'duel', label: 'Duel' },
@@ -45,7 +47,31 @@ function buildWeek(state, todayKey, refKey = todayKey) {
   };
 }
 
+// Après plus d'une minute en arrière-plan, l'animation d'ouverture est rejouée.
+const REPLAY_AFTER_MS = 60 * 1000;
+
 export default function App() {
+  const [intro, setIntro] = useState(true);
+  const leftAt = useRef(null);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'background') leftAt.current = Date.now();
+      else if (s === 'active' && leftAt.current && Date.now() - leftAt.current > REPLAY_AFTER_MS) setIntro(true);
+      if (s === 'active') leftAt.current = null;
+    });
+    return () => sub.remove();
+  }, []);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <MainApp />
+      {intro ? <Intro onDone={() => setIntro(false)} /> : null}
+    </View>
+  );
+}
+
+function MainApp() {
   const [screen, setScreen] = useState('duel');
   const [todayKey, setTodayKey] = useState(dayKey());
   const [state, setState] = useState(null); // null = chargement
@@ -85,6 +111,8 @@ export default function App() {
       }),
     [todayKey],
   );
+
+  const premium = usePremiumState();
 
   // Pas réels du téléphone (podomètre). On garde toujours le plus grand total connu pour chaque jour.
   const stepStatus = useStepCounter({
@@ -189,7 +217,15 @@ export default function App() {
       />
     );
   } else if (screen === 'photo') {
-    content = <PhotoScreen go={go} protein={day.protein} onAdd={addMeal} />;
+    content = (
+      <PhotoScreen
+        go={go}
+        protein={day.protein}
+        onAdd={addMeal}
+        analysesToday={day.analyses ?? 0}
+        onAnalysed={() => updateToday((d) => ({ ...d, analyses: (d.analyses ?? 0) + 1 }))}
+      />
+    );
   } else if (screen === 'programs') {
     content = <ProgramsScreen go={go} />;
   } else if (screen === 'session') {
@@ -203,6 +239,7 @@ export default function App() {
   }
 
   return (
+    <PremiumContext.Provider value={premium}>
     <ProfileContext.Provider value={state.profile}>
     <SafeAreaProvider>
       <StatusBar style="light" />
@@ -227,6 +264,7 @@ export default function App() {
       </SafeAreaView>
     </SafeAreaProvider>
     </ProfileContext.Provider>
+    </PremiumContext.Provider>
   );
 }
 

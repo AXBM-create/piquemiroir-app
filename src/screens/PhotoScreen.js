@@ -5,6 +5,7 @@ import { colors } from '../theme';
 import { useProfile } from '../profile';
 import { PrimaryButton, SecondaryButton, styles, Title } from '../components';
 import { API_URL } from '../config';
+import { FREE_PHOTOS_PER_DAY, usePremium } from '../premium';
 
 const CONFIDENCE = { faible: 'Estimation approximative', moyenne: 'Estimation correcte', elevee: 'Estimation fiable' };
 
@@ -26,8 +27,11 @@ async function analyseMeal(base64, mimeType) {
   }
 }
 
-export default function PhotoScreen({ go, protein, onAdd }) {
+export default function PhotoScreen({ go, protein, onAdd, analysesToday, onAnalysed }) {
   const profile = useProfile();
+  const { isPro } = usePremium();
+  const remaining = isPro ? Infinity : Math.max(0, FREE_PHOTOS_PER_DAY - analysesToday);
+  const locked = remaining === 0;
   const RIVAL_NAME = profile.rivalName;
   const PROTEIN_GOAL = profile.goals.protein;
 
@@ -52,7 +56,10 @@ export default function PhotoScreen({ go, protein, onAdd }) {
     try {
       const m = await analyseMeal(asset.base64, asset.mimeType);
       if (!m.isMeal) setError("Je ne vois pas de repas sur cette photo. Essaie avec ton assiette bien cadrée.");
-      else setMeal(m);
+      else {
+        setMeal(m);
+        onAnalysed();
+      }
     } catch (e) {
       setError(e.name === 'AbortError' ? "L'analyse a pris trop de temps. Vérifie ta connexion et réessaie." : `L'analyse n'a pas marché : ${e.message}`);
     } finally {
@@ -63,6 +70,7 @@ export default function PhotoScreen({ go, protein, onAdd }) {
   const pickerOptions = { mediaTypes: ['images'], quality: 0.4, base64: true };
 
   const takePhoto = async () => {
+    if (locked) return go('paywall');
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Appareil photo', "Autorise l'appareil photo pour analyser tes repas, ou choisis une photo dans ta galerie.");
@@ -73,6 +81,7 @@ export default function PhotoScreen({ go, protein, onAdd }) {
   };
 
   const pickPhoto = async () => {
+    if (locked) return go('paywall');
     const res = await ImagePicker.launchImageLibraryAsync(pickerOptions);
     if (!res.canceled && res.assets?.length) analyse(res.assets[0]);
   };
@@ -146,10 +155,24 @@ export default function PhotoScreen({ go, protein, onAdd }) {
           <SecondaryButton label="Reprendre une photo" onPress={takePhoto} />
         </>
       ) : (
-        <View style={{ gap: 10 }}>
-          <PrimaryButton label="Prendre une photo" onPress={takePhoto} disabled={loading} />
-          <SecondaryButton label="Choisir dans la galerie" onPress={pickPhoto} />
-        </View>
+        locked ? (
+          <View style={{ backgroundColor: colors.card, borderRadius: 18, padding: 16, gap: 12 }}>
+            <Text style={{ color: colors.text, fontSize: 15, lineHeight: 21 }}>
+              Tu as utilisé tes {FREE_PHOTOS_PER_DAY} analyses gratuites aujourd'hui. Passe à Premium pour des analyses illimitées, ou reviens demain.
+            </Text>
+            <PrimaryButton label="Voir Premium" onPress={() => go('paywall')} />
+          </View>
+        ) : (
+          <View style={{ gap: 10 }}>
+            <PrimaryButton label="Prendre une photo" onPress={takePhoto} disabled={loading} />
+            <SecondaryButton label="Choisir dans la galerie" onPress={pickPhoto} />
+            {isPro ? null : (
+              <Text style={{ color: colors.muted, fontSize: 12, textAlign: 'center' }}>
+                Version gratuite : encore {remaining} analyse{remaining > 1 ? 's' : ''} aujourd'hui.
+              </Text>
+            )}
+          </View>
+        )
       )}
     </ScrollView>
   );

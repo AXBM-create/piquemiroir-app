@@ -1,20 +1,56 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { FREE_PHOTOS_PER_DAY, usePremium } from '../premium';
 import { colors } from '../theme';
 import { useProfile } from '../profile';
 import { say } from '../rival';
 import { PrimaryButton, SecondaryButton, Title } from '../components';
 import { GOALS, LEVELS, TONES } from '../profile';
 
-const PERKS = ['Rival IA calé sur ton objectif', 'Analyse photo illimitée des repas', 'Duel quotidien et bilan chaque semaine', 'Programmes vidéo et séances en duel'];
+const PERKS = ['Analyse photo illimitée des repas', 'Rival IA calé sur ton objectif', 'Tous les programmes vidéo en duel', 'Bilan de la semaine et historique'];
 
 export default function PaywallScreen({ onReset, onEditProfile }) {
   const profile = useProfile();
   const { rivalName: RIVAL_NAME, tone } = profile;
   const PROTEIN_GOAL = profile.goals.protein;
   const STEPS_GOAL = profile.goals.steps;
+  const premium = usePremium();
   const [plan, setPlan] = useState('annual');
-  const annual = plan === 'annual';
+  const [busy, setBusy] = useState(false);
+  const annualPkg = premium.offering?.annual ?? null;
+  const monthlyPkg = premium.offering?.monthly ?? null;
+  const selected = plan === 'annual' ? annualPkg || monthlyPkg : monthlyPkg || annualPkg;
+  const annual = selected === annualPkg;
+  const trial = selected?.product?.introPrice && selected.product.introPrice.price === 0 ? selected.product.introPrice : null;
+  const saving =
+    annualPkg && monthlyPkg && monthlyPkg.product.price > 0
+      ? Math.round((1 - annualPkg.product.price / (monthlyPkg.product.price * 12)) * 100)
+      : 0;
+
+  const buy = async () => {
+    if (!selected) return;
+    setBusy(true);
+    try {
+      const ok = await premium.purchase(selected);
+      if (ok) Alert.alert('Bienvenue dans Premium', `Analyse photo illimitée débloquée. ${RIVAL_NAME} n'a qu'à bien se tenir.`);
+    } catch (e) {
+      Alert.alert('Achat impossible', e?.message || 'Réessaie dans un instant.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const restore = async () => {
+    setBusy(true);
+    try {
+      const ok = await premium.restore();
+      Alert.alert('Restauration', ok ? 'Ton abonnement Premium est de nouveau actif.' : 'Aucun abonnement trouvé pour ce compte.');
+    } catch (e) {
+      Alert.alert('Restauration impossible', e?.message || 'Réessaie dans un instant.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 18 }}>
@@ -28,33 +64,76 @@ export default function PaywallScreen({ onReset, onEditProfile }) {
         <SecondaryButton label="Modifier mon profil" onPress={onEditProfile} style={{ height: 44 }} />
       </View>
 
-      <Title kicker="PiqueMiroir Premium">{`${RIVAL_NAME} t'attend.\nEt toi ?`}</Title>
-      <Text style={{ color: colors.soft, fontSize: 15, lineHeight: 21 }}>Ton rival IA s'adapte à ton objectif. Il ne saute jamais une séance.</Text>
-
-      <View style={{ gap: 10 }}>
-        {PERKS.map((p) => (
-          <Text key={p} style={{ color: colors.text, fontSize: 14 }}>
-            <Text style={{ color: colors.me, fontWeight: '800' }}>✓ </Text>
-            {p}
+      {premium.isPro ? (
+        <View style={{ backgroundColor: colors.winBg, borderRadius: 20, padding: 18, gap: 8, borderWidth: 2, borderColor: colors.me }}>
+          <Text style={{ color: colors.me, fontWeight: '800', fontSize: 13, letterSpacing: 1 }}>PREMIUM ACTIF</Text>
+          <Text style={{ color: colors.text, fontSize: 15, lineHeight: 21 }}>Analyse photo illimitée et tous les avantages Premium sont débloqués.</Text>
+          <Text style={{ color: colors.muted, fontSize: 12 }}>Mode test : aucun paiement réel.</Text>
+        </View>
+      ) : (
+        <>
+          <Title kicker="PiqueMiroir Premium">{`${RIVAL_NAME} t'attend.\nEt toi ?`}</Title>
+          <Text style={{ color: colors.soft, fontSize: 15, lineHeight: 21 }}>
+            Version gratuite : {FREE_PHOTOS_PER_DAY} analyses de repas par jour. Premium enlève toutes les limites.
           </Text>
-        ))}
-      </View>
 
-      <View accessibilityRole="radiogroup" style={{ gap: 10 }}>
-        <Plan selected={annual} onPress={() => setPlan('annual')} title="Annuel" detail="59,99 $ par an, soit 5 $ par mois" badge="−61 %" />
-        <Plan selected={!annual} onPress={() => setPlan('monthly')} title="Mensuel" detail="12,99 $ par mois" />
-      </View>
+          <View style={{ gap: 10 }}>
+            {PERKS.map((p) => (
+              <Text key={p} style={{ color: colors.text, fontSize: 14 }}>
+                <Text style={{ color: colors.me, fontWeight: '800' }}>✓ </Text>
+                {p}
+              </Text>
+            ))}
+          </View>
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Step title="Aujourd'hui" text="accès complet" />
-        <Step title="Jour 5" text="rappel" center />
-        <Step title="Jour 7" text="1er paiement" right />
-      </View>
+          {!premium.ready ? (
+            <ActivityIndicator color={colors.me} />
+          ) : !annualPkg && !monthlyPkg ? (
+            <Text style={{ color: colors.rival, fontSize: 13, lineHeight: 19 }}>
+              Les formules ne sont pas disponibles pour le moment{premium.error ? ` (${premium.error})` : ''}.
+            </Text>
+          ) : (
+            <>
+              <View accessibilityRole="radiogroup" style={{ gap: 10 }}>
+                {annualPkg ? (
+                  <Plan
+                    selected={annual}
+                    onPress={() => setPlan('annual')}
+                    title="Annuel"
+                    detail={`${annualPkg.product.priceString} par an${annualPkg.product.pricePerMonthString ? `, soit ${annualPkg.product.pricePerMonthString} par mois` : ''}`}
+                    badge={saving > 0 ? `−${saving} %` : null}
+                  />
+                ) : null}
+                {monthlyPkg ? (
+                  <Plan selected={!annual} onPress={() => setPlan('monthly')} title="Mensuel" detail={`${monthlyPkg.product.priceString} par mois`} />
+                ) : null}
+              </View>
 
-      <PrimaryButton label="Commencer mes 7 jours gratuits" onPress={() => Alert.alert('Prototype', "Le paiement n'est pas encore activé dans cette version de test.")} />
-      <Text style={{ textAlign: 'center', color: colors.muted, fontSize: 12 }}>
-        {annual ? 'Puis 59,99 $ par an.' : 'Puis 12,99 $ par mois.'} Annulable à tout moment.
-      </Text>
+              {trial ? (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Step title="Aujourd'hui" text="accès complet" />
+                  <Step title="Avant la fin" text="rappel" center />
+                  <Step title="Fin de l'essai" text="1er paiement" right />
+                </View>
+              ) : null}
+
+              <PrimaryButton
+                label={busy ? 'Un instant…' : trial ? 'Commencer mon essai gratuit' : 'Passer à Premium'}
+                onPress={buy}
+                disabled={busy}
+              />
+              <Text style={{ textAlign: 'center', color: colors.muted, fontSize: 12 }}>
+                {annual ? `${annualPkg?.product.priceString} par an.` : `${monthlyPkg?.product.priceString} par mois.`} Annulable à tout moment.
+                {'\n'}Mode test RevenueCat : aucun paiement réel.
+              </Text>
+            </>
+          )}
+        </>
+      )}
+
+      <Pressable accessibilityRole="button" onPress={restore} disabled={busy} style={{ alignSelf: 'center', minHeight: 44, justifyContent: 'center' }}>
+        <Text style={{ color: colors.soft, fontSize: 13, textDecorationLine: 'underline' }}>Restaurer mes achats</Text>
+      </Pressable>
 
       <Pressable
         accessibilityRole="button"
