@@ -5,7 +5,7 @@ import { colors, RIVAL_NAME } from '../theme';
 import { PrimaryButton, SecondaryButton, styles, Title } from '../components';
 import { SAMPLE_MEALS } from '../data';
 
-const PROTEIN_GOAL = 120;
+import { PROTEIN_GOAL } from '../rules';
 
 export default function PhotoScreen({ go, protein, onAdd }) {
   const [uri, setUri] = useState(null);
@@ -81,7 +81,7 @@ export default function PhotoScreen({ go, protein, onAdd }) {
           <PrimaryButton
             label="Ajouter au duel"
             onPress={() => {
-              onAdd(meal.protein);
+              onAdd(meal);
               go('duel');
             }}
           />

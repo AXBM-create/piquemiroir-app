@@ -2,12 +2,12 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { colors, RIVAL_NAME } from '../theme';
 import { Avatar, Bar, PrimaryButton, RivalBubble, SecondaryButton, styles, Title } from '../components';
 
-const PROTEIN_GOAL = 120;
-const STEPS_GOAL = 8000;
+import { PROTEIN_GOAL, STEPS_GOAL } from '../rules';
+import { longLabel } from '../dates';
 
 const STATE_LABEL = { win: 'Gagné', loss: 'Perdu', tie: 'Égalité', pending: 'En cours' };
 
-export default function DuelScreen({ go, today, week, protein, steps, onAddSteps }) {
+export default function DuelScreen({ go, todayKey, today, week, protein, steps, sessionDone, onAddSteps }) {
   const sessionState = today.events.find((e) => e.key === 'seance').state;
   const rows = [
     { label: 'Séance', target: '5 exercices', me: STATE_LABEL[sessionState], meP: sessionState === 'pending' ? 0 : 100, rival: 'faite', rP: 100, state: sessionState },
@@ -28,7 +28,7 @@ export default function DuelScreen({ go, today, week, protein, steps, onAddSteps
   return (
     <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title kicker="Aujourd'hui">Duel du jour</Title>
+        <Title kicker={longLabel(todayKey)}>Duel du jour</Title>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.card, borderRadius: 999, paddingVertical: 6, paddingLeft: 6, paddingRight: 12 }}>
           <Avatar />
           <Text style={{ color: colors.text, fontWeight: '700' }}>{RIVAL_NAME}</Text>
@@ -72,7 +72,11 @@ export default function DuelScreen({ go, today, week, protein, steps, onAddSteps
 
       <View style={{ gap: 10 }}>
         <PrimaryButton label="Photographier un repas" onPress={() => go('photo')} />
-        <SecondaryButton label="Lancer ma séance du jour · 25 min" onPress={() => go('session')} />
+        {sessionDone ? (
+          <SecondaryButton label="Séance faite · voir le résultat" onPress={() => go('result')} />
+        ) : (
+          <SecondaryButton label="Lancer ma séance du jour · 25 min" onPress={() => go('session')} />
+        )}
       </View>
     </ScrollView>
   );

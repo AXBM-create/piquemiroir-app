@@ -3,7 +3,7 @@ import { colors, RIVAL_NAME } from '../theme';
 import { PrimaryButton, RivalBubble, SecondaryButton, styles, Title } from '../components';
 import { formatScore } from '../data';
 
-const PROTEIN_GOAL = 120;
+import { PROTEIN_GOAL } from '../rules';
 const LABEL = { win: 'Gagné', loss: 'Perdu', tie: 'Égalité' };
 
 export default function ResultScreen({ go, results, today, protein }) {

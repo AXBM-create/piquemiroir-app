@@ -5,7 +5,7 @@ import { PrimaryButton, Title } from '../components';
 
 const PERKS = ['Rival IA calé sur ton objectif', 'Analyse photo illimitée des repas', 'Duel quotidien et bilan chaque semaine', 'Programmes vidéo et séances en duel'];
 
-export default function PaywallScreen() {
+export default function PaywallScreen({ onReset }) {
   const [plan, setPlan] = useState('annual');
   const annual = plan === 'annual';
 
@@ -38,6 +38,19 @@ export default function PaywallScreen() {
       <Text style={{ textAlign: 'center', color: colors.muted, fontSize: 12 }}>
         {annual ? 'Puis 59,99 $ par an.' : 'Puis 12,99 $ par mois.'} Annulable à tout moment.
       </Text>
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={() =>
+          Alert.alert('Réinitialiser', 'Effacer tous tes scores, repas et séances enregistrés sur ce téléphone ?', [
+            { text: 'Annuler', style: 'cancel' },
+            { text: 'Effacer', style: 'destructive', onPress: onReset },
+          ])
+        }
+        style={{ alignSelf: 'center', minHeight: 44, justifyContent: 'center', marginTop: 12 }}
+      >
+        <Text style={{ color: colors.muted, fontSize: 12, textDecorationLine: 'underline' }}>Test : réinitialiser mes données</Text>
+      </Pressable>
     </ScrollView>
   );
 }
