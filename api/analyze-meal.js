@@ -109,11 +109,8 @@ async function withGemini(key, image, mediaType) {
       last = { status: 429, error: "Limite gratuite atteinte pour l'instant. Réessaie dans une minute." };
       continue; // modèle suivant : il a peut-être son propre quota
     }
-    if (r.status === 404 || r.status === 400 || r.status === 403) {
-      last = { status: 502, error: "L'analyse a échoué, réessaie dans un instant" };
-      continue; // modèle indisponible : on essaie le suivant
-    }
-    return { status: 502, error: "L'analyse a échoué, réessaie dans un instant" };
+    // 400/403/404 (modèle indisponible) ou 5xx (surcharge) : on essaie le modèle suivant.
+    last = { status: 502, error: "L'analyse a échoué, réessaie dans un instant" };
   }
   return last || { status: 502, error: "L'analyse a échoué" };
 }
