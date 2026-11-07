@@ -90,7 +90,7 @@ export default function PhotoScreen({ go, protein, onAdd }) {
         {loading ? (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(14,15,18,0.6)', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <ActivityIndicator color={colors.me} />
-            <Text style={{ color: colors.text, fontWeight: '600' }}>Claude analyse ton repas…</Text>
+            <Text style={{ color: colors.text, fontWeight: '600' }}>L'IA analyse ton repas…</Text>
           </View>
         ) : null}
       </View>
