@@ -10,7 +10,8 @@
     "ios": {
       "supportsTablet": false,
       "infoPlist": {
-        "NSCameraUsageDescription": "PiqueMiroir utilise l'appareil photo pour analyser tes repas."
+        "NSCameraUsageDescription": "PiqueMiroir utilise l'appareil photo pour analyser tes repas.",
+        "NSMotionUsageDescription": "PiqueMiroir compte tes pas pour l'épreuve du jour contre ton rival."
       }
     },
     "android": {
@@ -33,6 +34,12 @@
         "expo-image-picker",
         {
           "cameraPermission": "PiqueMiroir utilise l'appareil photo pour analyser tes repas."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "PiqueMiroir compte tes pas pour l'épreuve du jour contre ton rival."
         }
       ]
     ],

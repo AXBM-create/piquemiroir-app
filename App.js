@@ -10,6 +10,7 @@ import { evaluateDay } from './src/rules';
 import { EXERCISES } from './src/data';
 import { ProfileContext, startBests } from './src/profile';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import { useStepCounter } from './src/steps';
 import DuelScreen from './src/screens/DuelScreen';
 import PhotoScreen from './src/screens/PhotoScreen';
 import ProgramsScreen from './src/screens/ProgramsScreen';
@@ -84,6 +85,20 @@ export default function App() {
       }),
     [todayKey],
   );
+
+  // Pas réels du téléphone (podomètre). On garde toujours le plus grand total connu pour chaque jour.
+  const stepStatus = useStepCounter({
+    todayKey,
+    startedOn: state?.startedOn ?? todayKey,
+    getSavedSteps: (key) => state?.days[key]?.steps ?? 0,
+    onSteps: (key, steps) =>
+      setState((s) => {
+        if (!s) return s;
+        const current = s.days[key] || emptyDay();
+        if (steps <= current.steps) return s;
+        return { ...s, days: { ...s.days, [key]: { ...current, steps } } };
+      }),
+  });
 
   const today = useMemo(() => evaluateDay(day, false, state?.profile?.goals), [day, state?.profile]);
   const week = useMemo(() => (state ? buildWeek(state, todayKey) : null), [state, todayKey]);
@@ -169,6 +184,7 @@ export default function App() {
         protein={day.protein}
         steps={day.steps}
         sessionDone={!!day.session}
+        stepStatus={stepStatus}
         onAddSteps={() => updateToday((d) => ({ ...d, steps: d.steps + 1000 }))}
       />
     );

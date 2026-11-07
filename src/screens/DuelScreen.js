@@ -8,7 +8,7 @@ import { longLabel } from '../dates';
 
 const STATE_LABEL = { win: 'Gagné', loss: 'Perdu', tie: 'Égalité', pending: 'En cours' };
 
-export default function DuelScreen({ go, todayKey, today, week, protein, steps, sessionDone, onAddSteps }) {
+export default function DuelScreen({ go, todayKey, today, week, protein, steps, sessionDone, stepStatus, onAddSteps }) {
   const profile = useProfile();
   const { rivalName: RIVAL_NAME, tone } = profile;
   const PROTEIN_GOAL = profile.goals.protein;
@@ -70,9 +70,20 @@ export default function DuelScreen({ go, todayKey, today, week, protein, steps, 
             <Row who={RIVAL_NAME} pct={r.rP} value={r.rival} color={colors.rival} />
           </View>
         ))}
-        <Pressable onPress={onAddSteps} accessibilityRole="button" style={{ alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' }}>
-          <Text style={{ color: colors.muted, fontSize: 12, textDecorationLine: 'underline' }}>Test : simuler +1 000 pas</Text>
-        </Pressable>
+{stepStatus === 'ok' ? (
+          <Text style={{ color: colors.muted, fontSize: 12 }}>Pas comptés automatiquement par ton téléphone.</Text>
+        ) : stepStatus === 'checking' ? null : (
+          <View style={{ gap: 4 }}>
+            <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 17 }}>
+              {stepStatus === 'denied'
+                ? "Podomètre refusé : autorise « Mouvements et forme » pour Expo Go dans les Réglages de l'iPhone."
+                : 'Podomètre indisponible sur cet appareil.'}
+            </Text>
+            <Pressable onPress={onAddSteps} accessibilityRole="button" style={{ alignSelf: 'flex-start', minHeight: 32, justifyContent: 'center' }}>
+              <Text style={{ color: colors.muted, fontSize: 12, textDecorationLine: 'underline' }}>Test : simuler +1 000 pas</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
 
       <RivalBubble>{message}</RivalBubble>
