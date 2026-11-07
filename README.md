@@ -27,7 +27,7 @@ Le téléphone et l'ordinateur doivent être sur le même Wi-Fi. Sinon, lance `n
 | Écran | Ce que tu peux tester |
 | --- | --- |
 | Duel du jour | Score de la semaine, 3 épreuves du jour (séance, protéines, pas), message de Nova |
-| Photo du repas | Appareil photo ou galerie ; l'analyse nutritionnelle est **simulée** (valeurs d'exemple) |
+| Photo du repas | Appareil photo ou galerie ; analyse par **Claude** (protéines, kcal, glucides, lipides) via le serveur `/api` |
 | Programmes | Programme « Brûle-graisse maison » avec aperçu vidéo |
 | Séance | 5 exercices vidéo ; bouton « +1 répétition » ou chrono « Je lâche » (gainage) ; Nova vise ton meilleur score + 7 % |
 | Résultat | Gagné / perdu / égalité par exercice, effet sur la journée |
@@ -43,7 +43,16 @@ Le téléphone et l'ordinateur doivent être sur le même Wi-Fi. Sinon, lance `n
 
 ## Pas encore branché
 
-- Analyse IA réelle des photos de repas
 - Comptage des répétitions par la caméra
 - Lecture des pas (Santé / Google Fit) — un lien « Test : simuler +1 000 pas » le remplace
 - Comptes, sauvegarde et paiement
+
+## Serveur (Vercel)
+
+Le dossier `api/` contient la fonction `POST /api/analyze-meal`, déployée sur Vercel (`vercel.json`).
+Variables d'environnement Vercel :
+
+- `ANTHROPIC_API_KEY` (obligatoire) : clé de l'API Claude, jamais dans l'app.
+- `ANTHROPIC_MODEL` (facultatif) : modèle utilisé, `claude-sonnet-5-5` par défaut.
+
+L'adresse du serveur est dans `src/config.js`.

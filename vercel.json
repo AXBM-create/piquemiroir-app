@@ -1,0 +1,9 @@
+{
+  "framework": null,
+  "installCommand": "echo \"Aucune installation : seule l'API /api est déployée\"",
+  "buildCommand": "echo \"Pas de build\"",
+  "outputDirectory": "public",
+  "functions": {
+    "api/analyze-meal.js": { "maxDuration": 60 }
+  }
+}
