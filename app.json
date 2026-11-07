@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "PiqueMiroir",
+    "name": "Kontra",
     "slug": "piquemiroir-app",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -10,8 +10,8 @@
     "ios": {
       "supportsTablet": false,
       "infoPlist": {
-        "NSCameraUsageDescription": "PiqueMiroir utilise l'appareil photo pour analyser tes repas.",
-        "NSMotionUsageDescription": "PiqueMiroir compte tes pas pour l'épreuve du jour contre ton rival."
+        "NSCameraUsageDescription": "Kontra utilise l'appareil photo pour analyser tes repas.",
+        "NSMotionUsageDescription": "Kontra compte tes pas pour l'épreuve du jour contre ton rival."
       }
     },
     "android": {
@@ -33,13 +33,13 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "PiqueMiroir utilise l'appareil photo pour analyser tes repas."
+          "cameraPermission": "Kontra utilise l'appareil photo pour analyser tes repas."
         }
       ],
       [
         "expo-sensors",
         {
-          "motionPermission": "PiqueMiroir compte tes pas pour l'épreuve du jour contre ton rival."
+          "motionPermission": "Kontra compte tes pas pour l'épreuve du jour contre ton rival."
         }
       ],
       [

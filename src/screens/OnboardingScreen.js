@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { colors } from '../theme';
 import { PrimaryButton, SecondaryButton, styles as ui } from '../components';
 import { GOALS, LB_PER_KG, LEVELS, RIVAL_NAMES, TONES, computeGoals } from '../profile';
 import { say } from '../rival';
 
+const WELCOME = require('../../assets/welcome.png');
+
 const STEPS = ['name', 'goal', 'weight', 'level', 'rival', 'creating', 'ready'];
 
 export default function OnboardingScreen({ initial, onDone, onCancel }) {
   const [step, setStep] = useState(0);
+  const [welcome, setWelcome] = useState(!initial); // écran d'accueil : seulement à la première ouverture
   const [name, setName] = useState(initial?.name ?? '');
   const [goal, setGoal] = useState(initial?.goal ?? null);
   const [unit, setUnit] = useState(initial?.unit ?? 'kg');
@@ -45,6 +48,8 @@ export default function OnboardingScreen({ initial, onDone, onCancel }) {
   const next = () => setStep((s) => s + 1);
   const back = () => (step === 0 ? onCancel?.() : setStep((s) => s - 1));
   const questionCount = 5;
+
+  if (welcome) return <Welcome onStart={() => setWelcome(false)} />;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -199,6 +204,27 @@ const inputStyle = {
   fontSize: 18,
   paddingHorizontal: 16,
 };
+
+function Welcome({ onStart }) {
+  return (
+    <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 24, gap: 22, justifyContent: 'center' }}>
+      <Image
+        source={WELCOME}
+        style={{ width: '100%', aspectRatio: 1080 / 1000, borderRadius: 28 }}
+        accessibilityLabel="Toi contre ton rival IA"
+      />
+      <View style={{ gap: 10 }}>
+        <Text style={{ color: colors.me, fontSize: 13, fontWeight: '800', letterSpacing: 2 }}>KONTRA</Text>
+        <Text style={[ui.title, { fontSize: 32, lineHeight: 38 }]}>Ton rival IA t'attend.</Text>
+        <Text style={{ color: colors.soft, fontSize: 16, lineHeight: 23 }}>
+          Chaque jour, un duel : séance, protéines, pas. Bats-le, ou il te le rappellera.
+        </Text>
+      </View>
+      <PrimaryButton label="Créer mon rival" onPress={onStart} />
+      <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>1 minute · sans compte</Text>
+    </ScrollView>
+  );
+}
 
 function Question({ title, hint, children }) {
   return (

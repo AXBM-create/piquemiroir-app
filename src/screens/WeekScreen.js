@@ -17,7 +17,7 @@ export default function WeekScreen({ week, lastWeek }) {
   const remaining = week.days.filter((d) => d.state === 'future' || d.state === 'today').length;
   const share = () =>
     Share.share({
-      message: `Cette semaine sur PiqueMiroir : ${week.me}–${week.nova} contre mon rival IA ${RIVAL_NAME}. Et toi, tu tiendrais ?`,
+      message: `Cette semaine sur Kontra : ${week.me}–${week.nova} contre mon rival IA ${RIVAL_NAME}. Et toi, tu tiendrais ?`,
     });
 
   const headline = leading
@@ -39,7 +39,7 @@ export default function WeekScreen({ week, lastWeek }) {
 
       <View style={{ borderRadius: 28, backgroundColor: colors.me, padding: 24, gap: 18 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ fontWeight: '800', fontSize: 15, color: colors.bg }}>PiqueMiroir</Text>
+          <Text style={{ fontWeight: '800', fontSize: 15, color: colors.bg }}>Kontra</Text>
           <Text style={{ fontSize: 12, fontWeight: '700', color: colors.bg, backgroundColor: 'rgba(14,15,18,0.12)', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, overflow: 'hidden' }}>
             {remaining === 0 ? 'Semaine terminée' : 'Semaine en cours'}
           </Text>

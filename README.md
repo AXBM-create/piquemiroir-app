@@ -1,4 +1,4 @@
-# PiqueMiroir — prototype Expo
+# Kontra (ex-PiqueMiroir)
 
 App de remise en forme où tu affrontes **Nova**, un rival IA, chaque jour : séance d'exercices en vidéo, protéines (photo des repas) et pas.
 

@@ -72,7 +72,7 @@ export default function PaywallScreen({ onReset, onEditProfile }) {
         </View>
       ) : (
         <>
-          <Title kicker="PiqueMiroir Premium">{`${RIVAL_NAME} t'attend.\nEt toi ?`}</Title>
+          <Title kicker="Kontra Premium">{`${RIVAL_NAME} t'attend.\nEt toi ?`}</Title>
           <Text style={{ color: colors.soft, fontSize: 15, lineHeight: 21 }}>
             Version gratuite : {FREE_PHOTOS_PER_DAY} analyses de repas par jour. Premium enlève toutes les limites.
           </Text>

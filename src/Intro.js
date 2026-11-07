@@ -5,9 +5,10 @@ import { colors } from './theme';
 const LEFT = require('../assets/intro-left.png');
 const RIGHT = require('../assets/intro-right.png');
 const BOLT = require('../assets/intro-bolt.png');
+const BG = require('../assets/intro-bg.png');
 
 // Animation d'ouverture : ta moitié (vert) et celle du rival (corail) s'entrechoquent,
-// un éclair jaillit, puis le nom de l'app apparaît. Environ 2 secondes.
+// un éclair jaillit, puis le nom de l'app (Kontra) apparaît. Environ 2 secondes.
 export default function Intro({ onDone }) {
   const { width } = useWindowDimensions();
   const size = Math.min(width * 0.72, 320);
@@ -17,9 +18,11 @@ export default function Intro({ onDone }) {
   const pulse = useRef(new Animated.Value(1)).current;
   const word = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(1)).current;
+  const bgIn = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const anim = Animated.sequence([
+      Animated.timing(bgIn, { toValue: 1, duration: 260, useNativeDriver: true }),
       Animated.timing(slide, { toValue: 1, duration: 520, easing: Easing.in(Easing.cubic), useNativeDriver: true }),
       Animated.parallel([
         Animated.sequence([
@@ -48,6 +51,7 @@ export default function Intro({ onDone }) {
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, styles.root, { opacity: fade }]} pointerEvents="none">
+      <Animated.Image source={BG} resizeMode="cover" style={[StyleSheet.absoluteFill, { width: '100%', height: '100%', opacity: bgIn }]} />
       <Animated.View style={{ width: size, height: size, transform: [{ scale: pulse }] }}>
         <Animated.Image source={LEFT} style={[styles.img, { transform: [{ translateX: leftX }, { rotate: tilt }] }]} />
         <Animated.Image source={RIGHT} style={[styles.img, { transform: [{ translateX: rightX }, { rotate: tiltR }] }]} />
@@ -55,9 +59,9 @@ export default function Intro({ onDone }) {
       </Animated.View>
       <Animated.View style={{ alignItems: 'center', opacity: word, transform: [{ translateY: wordY }] }}>
         <Text style={styles.word}>
-          Pique<Text style={{ color: colors.me }}>Miroir</Text>
+          KON<Text style={{ color: colors.rival }}>TRA</Text>
         </Text>
-        <Text style={styles.tag}>Bats ton rival. Chaque jour.</Text>
+        <Text style={styles.tag}>Ton rival IA. Chaque jour.</Text>
       </Animated.View>
     </Animated.View>
   );
@@ -66,6 +70,6 @@ export default function Intro({ onDone }) {
 const styles = StyleSheet.create({
   root: { backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', zIndex: 100 },
   img: { position: 'absolute', width: '100%', height: '100%' },
-  word: { color: '#F2F3F5', fontSize: 40, fontWeight: '900', letterSpacing: -1, marginTop: 8 },
+  word: { color: '#F2F3F5', fontSize: 46, fontWeight: '900', letterSpacing: 6, marginTop: 12 },
   tag: { color: colors.muted, fontSize: 16, fontWeight: '600', marginTop: 6 },
 });

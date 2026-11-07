@@ -47,8 +47,8 @@ function buildWeek(state, todayKey, refKey = todayKey) {
   };
 }
 
-// Après plus d'une minute en arrière-plan, l'animation d'ouverture est rejouée.
-const REPLAY_AFTER_MS = 60 * 1000;
+// Après plus de 15 secondes en arrière-plan, l'animation d'ouverture est rejouée.
+const REPLAY_AFTER_MS = 15 * 1000;
 
 export default function App() {
   const [intro, setIntro] = useState(true);
