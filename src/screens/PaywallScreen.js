@@ -1,17 +1,34 @@
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
-import { colors, RIVAL_NAME } from '../theme';
-import { PrimaryButton, Title } from '../components';
+import { colors } from '../theme';
+import { useProfile } from '../profile';
+import { say } from '../rival';
+import { PrimaryButton, SecondaryButton, Title } from '../components';
+import { GOALS, LEVELS, TONES } from '../profile';
 
 const PERKS = ['Rival IA calé sur ton objectif', 'Analyse photo illimitée des repas', 'Duel quotidien et bilan chaque semaine', 'Programmes vidéo et séances en duel'];
 
-export default function PaywallScreen({ onReset }) {
+export default function PaywallScreen({ onReset, onEditProfile }) {
+  const profile = useProfile();
+  const { rivalName: RIVAL_NAME, tone } = profile;
+  const PROTEIN_GOAL = profile.goals.protein;
+  const STEPS_GOAL = profile.goals.steps;
   const [plan, setPlan] = useState('annual');
   const annual = plan === 'annual';
 
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 18 }}>
-      <Title kicker="PiqueMiroir Premium">{`${RIVAL_NAME} est prête.\nEt toi ?`}</Title>
+      <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 16, gap: 8 }}>
+        <Text style={{ color: colors.text, fontWeight: '800', fontSize: 18 }}>{profile.name}</Text>
+        <Text style={{ color: colors.muted, fontSize: 13, lineHeight: 19 }}>
+          {GOALS.find((g) => g.key === profile.goal)?.label} · {LEVELS.find((l) => l.key === profile.level)?.label} ·{' '}
+          {profile.unit === 'lb' ? `${Math.round(profile.weightKg * 2.20462)} lb` : `${profile.weightKg} kg`}
+          {'\n'}Rival : {RIVAL_NAME} ({TONES.find((t) => t.key === tone)?.label.toLowerCase()}) · {PROTEIN_GOAL} g de protéines · {STEPS_GOAL.toLocaleString('fr-FR')} pas
+        </Text>
+        <SecondaryButton label="Modifier mon profil" onPress={onEditProfile} style={{ height: 44 }} />
+      </View>
+
+      <Title kicker="PiqueMiroir Premium">{`${RIVAL_NAME} t'attend.\nEt toi ?`}</Title>
       <Text style={{ color: colors.soft, fontSize: 15, lineHeight: 21 }}>Ton rival IA s'adapte à ton objectif. Il ne saute jamais une séance.</Text>
 
       <View style={{ gap: 10 }}>

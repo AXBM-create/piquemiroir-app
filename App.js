@@ -7,6 +7,9 @@ import { colors } from './src/theme';
 import { addDays, dayKey, dayLetter, weekDays } from './src/dates';
 import { clearState, emptyDay, initialState, loadState, saveState } from './src/storage';
 import { evaluateDay } from './src/rules';
+import { EXERCISES } from './src/data';
+import { ProfileContext, startBests } from './src/profile';
+import OnboardingScreen from './src/screens/OnboardingScreen';
 import DuelScreen from './src/screens/DuelScreen';
 import PhotoScreen from './src/screens/PhotoScreen';
 import ProgramsScreen from './src/screens/ProgramsScreen';
@@ -24,12 +27,13 @@ const TABS = [
 
 // Calcule le résultat d'une semaine (lundi → dimanche) à partir des journées enregistrées.
 function buildWeek(state, todayKey, refKey = todayKey) {
+  const goals = state.profile?.goals;
   const days = weekDays(refKey).map((key) => {
     let s;
     if (key > todayKey) s = 'future';
     else if (key < state.startedOn) s = 'none'; // avant l'installation : non compté
-    else if (key === todayKey) s = evaluateDay(state.days[key], false).decided ?? 'today';
-    else s = evaluateDay(state.days[key], true).decided; // journée terminée
+    else if (key === todayKey) s = evaluateDay(state.days[key], false, goals).decided ?? 'today';
+    else s = evaluateDay(state.days[key], true, goals).decided; // journée terminée
     return { key, day: dayLetter(key), state: s };
   });
   return {
@@ -81,7 +85,7 @@ export default function App() {
     [todayKey],
   );
 
-  const today = useMemo(() => evaluateDay(day, false), [day]);
+  const today = useMemo(() => evaluateDay(day, false, state?.profile?.goals), [day, state?.profile]);
   const week = useMemo(() => (state ? buildWeek(state, todayKey) : null), [state, todayKey]);
   const lastWeek = useMemo(() => {
     if (!state) return null;
@@ -95,6 +99,31 @@ export default function App() {
       <View style={[styles.root, { alignItems: 'center', justifyContent: 'center' }]}>
         <ActivityIndicator color={colors.me} />
       </View>
+    );
+  }
+
+  const saveProfile = (profile) => {
+    setState((s) => ({
+      ...s,
+      profile,
+      // Premier profil : les scores de départ du rival suivent le niveau choisi.
+      best: s.profile || Object.keys(s.days).length ? s.best : startBests(EXERCISES, profile.level),
+    }));
+    setScreen('duel');
+  };
+
+  if (!state.profile || screen === 'editProfile') {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="light" />
+        <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+          <OnboardingScreen
+            initial={state.profile}
+            onDone={saveProfile}
+            onCancel={state.profile ? () => setScreen('paywall') : undefined}
+          />
+        </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
@@ -154,10 +183,11 @@ export default function App() {
   } else if (screen === 'week') {
     content = <WeekScreen go={go} week={week} lastWeek={lastWeek} />;
   } else if (screen === 'paywall') {
-    content = <PaywallScreen go={go} onReset={resetAll} />;
+    content = <PaywallScreen go={go} onReset={resetAll} onEditProfile={() => setScreen('editProfile')} />;
   }
 
   return (
+    <ProfileContext.Provider value={state.profile}>
     <SafeAreaProvider>
       <StatusBar style="light" />
       <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
@@ -180,6 +210,7 @@ export default function App() {
         ) : null}
       </SafeAreaView>
     </SafeAreaProvider>
+    </ProfileContext.Provider>
   );
 }
 

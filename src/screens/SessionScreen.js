@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { colors, RIVAL_NAME } from '../theme';
+import { colors } from '../theme';
+import { useProfile } from '../profile';
+import { say } from '../rival';
 import { EFFORT_SECONDS, EXERCISES, HOLD_MAX_SECONDS, formatScore, novaTarget } from '../data';
 
 // Phases d'un exercice : 'ready' (on regarde la démo) -> 'go' (effort) -> 'done' (verdict).
 export default function SessionScreen({ go, best, onFinish }) {
+  const profile = useProfile();
+  const { rivalName: RIVAL_NAME, tone } = profile;
+  const PROTEIN_GOAL = profile.goals.protein;
+  const STEPS_GOAL = profile.goals.steps;
   const [idx, setIdx] = useState(0);
   const [phase, setPhase] = useState('ready');
   const [elapsed, setElapsed] = useState(0);

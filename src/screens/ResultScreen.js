@@ -1,12 +1,17 @@
 import { ScrollView, Text, View } from 'react-native';
-import { colors, RIVAL_NAME } from '../theme';
+import { colors } from '../theme';
+import { useProfile } from '../profile';
+import { say } from '../rival';
 import { PrimaryButton, RivalBubble, SecondaryButton, styles, Title } from '../components';
 import { formatScore } from '../data';
 
-import { PROTEIN_GOAL } from '../rules';
 const LABEL = { win: 'Gagné', loss: 'Perdu', tie: 'Égalité' };
 
 export default function ResultScreen({ go, results, today, protein }) {
+  const profile = useProfile();
+  const { rivalName: RIVAL_NAME, tone } = profile;
+  const PROTEIN_GOAL = profile.goals.protein;
+  const STEPS_GOAL = profile.goals.steps;
   if (!results) return null;
   const won = results.filter((r) => r.outcome === 'win').length;
   const lost = results.filter((r) => r.outcome === 'loss').length;
@@ -14,8 +19,8 @@ export default function ResultScreen({ go, results, today, protein }) {
   const title = won > lost ? `Tu as battu ${RIVAL_NAME}` : lost > won ? `${RIVAL_NAME} gagne cette séance` : 'Match nul';
   const worst = results.find((r) => r.outcome === 'loss');
   const taunt = worst
-    ? `${worst.name}, c'est mon terrain. La prochaine fois je vise ${formatScore(worst.type, Math.ceil(worst.nova * 1.07))}.`
-    : `Respect. Demain j'augmente mes objectifs, prépare-toi.`;
+    ? say(tone, 'resultLost', { exercise: worst.name, target: formatScore(worst.type, Math.ceil(worst.nova * 1.07)) })
+    : say(tone, 'resultAllWon');
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, gap: 14 }}>

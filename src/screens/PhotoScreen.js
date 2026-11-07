@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { colors, RIVAL_NAME } from '../theme';
+import { colors } from '../theme';
+import { useProfile } from '../profile';
+import { say } from '../rival';
 import { PrimaryButton, SecondaryButton, styles, Title } from '../components';
 import { SAMPLE_MEALS } from '../data';
 
-import { PROTEIN_GOAL } from '../rules';
 
 export default function PhotoScreen({ go, protein, onAdd }) {
+  const profile = useProfile();
+  const { rivalName: RIVAL_NAME, tone } = profile;
+  const PROTEIN_GOAL = profile.goals.protein;
+  const STEPS_GOAL = profile.goals.steps;
   const [uri, setUri] = useState(null);
   const [loading, setLoading] = useState(false);
   const [meal, setMeal] = useState(null);

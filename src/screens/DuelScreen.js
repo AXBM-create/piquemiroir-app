@@ -1,13 +1,18 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { colors, RIVAL_NAME } from '../theme';
+import { colors } from '../theme';
+import { useProfile } from '../profile';
+import { say } from '../rival';
 import { Avatar, Bar, PrimaryButton, RivalBubble, SecondaryButton, styles, Title } from '../components';
 
-import { PROTEIN_GOAL, STEPS_GOAL } from '../rules';
 import { longLabel } from '../dates';
 
 const STATE_LABEL = { win: 'Gagné', loss: 'Perdu', tie: 'Égalité', pending: 'En cours' };
 
 export default function DuelScreen({ go, todayKey, today, week, protein, steps, sessionDone, onAddSteps }) {
+  const profile = useProfile();
+  const { rivalName: RIVAL_NAME, tone } = profile;
+  const PROTEIN_GOAL = profile.goals.protein;
+  const STEPS_GOAL = profile.goals.steps;
   const sessionState = today.events.find((e) => e.key === 'seance').state;
   const rows = [
     { label: 'Séance', target: '5 exercices', me: STATE_LABEL[sessionState], meP: sessionState === 'pending' ? 0 : 100, rival: 'faite', rP: 100, state: sessionState },
@@ -18,17 +23,19 @@ export default function DuelScreen({ go, todayKey, today, week, protein, steps, 
   const missing = Math.max(0, PROTEIN_GOAL - protein);
   const message =
     today.decided === 'win'
-      ? `Bien joué, tu m'as battu aujourd'hui. Demain je reviens plus fort.`
-      : missing > 0
-        ? `Il te manque ${missing} g de protéines. Moi, j'ai déjà fini ma journée.`
-        : sessionState === 'pending'
-          ? `Tes protéines sont faites. Viens te mesurer à moi sur la séance.`
-          : `Encore ${Math.max(0, STEPS_GOAL - steps + 1).toLocaleString('fr-FR')} pas et la journée est à toi.`;
+      ? say(tone, 'dayWon')
+      : today.decided === 'loss'
+        ? say(tone, 'dayLost')
+        : missing > 0
+          ? say(tone, 'missingProtein', { missing })
+          : sessionState === 'pending'
+            ? say(tone, 'sessionPending')
+            : say(tone, 'stepsLeft', { steps: Math.max(0, STEPS_GOAL - steps + 1).toLocaleString('fr-FR') });
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Title kicker={longLabel(todayKey)}>Duel du jour</Title>
+        <Title kicker={longLabel(todayKey)}>{profile.name ? `${profile.name} vs ${RIVAL_NAME}` : 'Duel du jour'}</Title>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.card, borderRadius: 999, paddingVertical: 6, paddingLeft: 6, paddingRight: 12 }}>
           <Avatar />
           <Text style={{ color: colors.text, fontWeight: '700' }}>{RIVAL_NAME}</Text>

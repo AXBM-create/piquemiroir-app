@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, RIVAL_NAME } from './theme';
+import { colors } from './theme';
+import { useProfile } from './profile';
 
 export function Title({ kicker, children }) {
   return (
@@ -47,9 +48,10 @@ export function RivalBubble({ children }) {
 }
 
 export function Avatar({ size = 32 }) {
+  const { rivalName } = useProfile();
   return (
     <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
-      <Text style={{ fontWeight: '800', color: colors.bg, fontSize: size * 0.42 }}>{RIVAL_NAME[0]}</Text>
+      <Text style={{ fontWeight: '800', color: colors.bg, fontSize: size * 0.42 }}>{rivalName[0]}</Text>
     </View>
   );
 }

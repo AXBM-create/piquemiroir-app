@@ -1,11 +1,17 @@
 import { Share, ScrollView, Text, View } from 'react-native';
-import { colors, RIVAL_NAME } from '../theme';
+import { colors } from '../theme';
+import { useProfile } from '../profile';
+import { say } from '../rival';
 import { PrimaryButton, RivalBubble, Title } from '../components';
 import { shortRange } from '../dates';
 
 const MARK = { win: 'G', loss: 'P', today: '•' };
 
 export default function WeekScreen({ week, lastWeek }) {
+  const profile = useProfile();
+  const { rivalName: RIVAL_NAME, tone } = profile;
+  const PROTEIN_GOAL = profile.goals.protein;
+  const STEPS_GOAL = profile.goals.steps;
   const leading = week.me > week.nova;
   const tied = week.me === week.nova;
   const remaining = week.days.filter((d) => d.state === 'future' || d.state === 'today').length;
@@ -23,9 +29,9 @@ export default function WeekScreen({ week, lastWeek }) {
   const taunt =
     remaining === 0
       ? leading
-        ? `Semaine perdue pour moi. Lundi, on remet les compteurs à zéro.`
-        : `Semaine pour moi. Lundi, tu as ta revanche.`
-      : `Il reste ${remaining} jour${remaining > 1 ? 's' : ''} cette semaine. Je compte bien tous les gagner.`;
+        ? say(tone, 'weekOverWon')
+        : say(tone, 'weekOverLost')
+      : say(tone, 'weekLeft', { days: remaining });
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
